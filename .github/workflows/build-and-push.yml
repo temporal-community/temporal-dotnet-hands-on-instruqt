@@ -45,10 +45,8 @@ jobs:
         path: temporal-dotnet-hands-on
 
     - name: Log in to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: mmerrell
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+      run: |
+        echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u mmerrell --password-stdin
 
     - name: Build and push
       uses: docker/build-push-action@v5
