@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "Challenge 00 solve: environment check only, nothing to solve."
+exit 0

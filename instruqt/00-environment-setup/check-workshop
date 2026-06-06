@@ -1,0 +1,15 @@
+#!/bin/bash
+set -euo pipefail
+
+if ! temporal operator cluster health --address 127.0.0.1:7233 2>/dev/null | grep -q "SERVING"; then
+    echo "FAIL: Temporal dev server is not healthy. Wait a moment and try again."
+    exit 1
+fi
+
+if ! dotnet --version >/dev/null 2>&1; then
+    echo "FAIL: dotnet CLI not found."
+    exit 1
+fi
+
+echo "OK: Temporal healthy, .NET SDK available."
+exit 0

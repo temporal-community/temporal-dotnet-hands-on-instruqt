@@ -1,0 +1,13 @@
+# Docker build artifacts
+*.tar
+*.zip
+
+# Instruqt conflict files
+instruqt/**/*.remote
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+*.swp

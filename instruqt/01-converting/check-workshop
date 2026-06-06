@@ -1,0 +1,40 @@
+#!/bin/bash
+set -euo pipefail
+fail() { echo "FAIL: $1"; exit 1; }
+pass() { echo "PASS: $1"; }
+
+ACTIVITIES="/root/workshop/exercise/VehicleTransactionActivities.cs"
+WORKFLOW="/root/workshop/exercise/VehicleTransactionWorkflow.cs"
+
+# Check stubs are implemented
+if grep -q "NotImplementedException" "$ACTIVITIES"; then
+    fail "VehicleTransactionActivities.cs still has unimplemented stubs."
+fi
+pass "Activities implemented"
+
+if grep -q "NotImplementedException" "$WORKFLOW"; then
+    fail "VehicleTransactionWorkflow.cs still has unimplemented stubs."
+fi
+pass "Workflow implemented"
+
+# Check project compiles
+cd /root/workshop/exercise
+if ! dotnet build -q 2>&1; then
+    fail "Project does not compile. Check the terminal for errors."
+fi
+pass "Project compiles"
+
+# Check at least one workflow completed
+COMPLETED=$(temporal workflow list \
+    --address 127.0.0.1:7233 \
+    --namespace default \
+    --query 'TaskQueue="vehicle-transaction" AND ExecutionStatus="Completed"' \
+    --limit 1 2>/dev/null | grep -c "Completed" || true)
+
+if [[ "${COMPLETED}" -lt 1 ]]; then
+    fail "No completed workflows found yet. Run the starter and wait for it to finish."
+fi
+pass "At least one workflow completed successfully"
+
+echo "Exercise 1 complete."
+exit 0

@@ -1,0 +1,100 @@
+name: Build image and push track
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      code_ref:
+        description: 'Branch/tag/SHA of temporal-dotnet-hands-on to bake'
+        required: false
+        default: 'main'
+
+jobs:
+  paths-filter:
+    runs-on: ubuntu-latest
+    outputs:
+      docker: ${{ steps.filter.outputs.docker }}
+      instruqt: ${{ steps.filter.outputs.instruqt }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        filters: |
+          docker:
+            - 'docker/**'
+          instruqt:
+            - 'instruqt/**'
+
+  build-image:
+    needs: paths-filter
+    if: needs.paths-filter.outputs.docker == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Checkout companion code repo
+      uses: actions/checkout@v4
+      with:
+        repository: temporal-community/temporal-dotnet-hands-on
+        ref: ${{ github.event.inputs.code_ref || 'main' }}
+        path: temporal-dotnet-hands-on
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: mmerrell
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: docker/Dockerfile
+        push: true
+        tags: |
+          mmerrell/temporal-dotnet-hands-on-instruqt:latest
+          mmerrell/temporal-dotnet-hands-on-instruqt:${{ github.sha }}
+
+  push-track:
+    needs: [paths-filter, build-image]
+    if: |
+      always() &&
+      (needs.paths-filter.outputs.instruqt == 'true' || needs.paths-filter.outputs.docker == 'true' || github.event_name == 'workflow_dispatch') &&
+      (needs.build-image.result == 'success' || needs.build-image.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Instruqt CLI
+      run: |
+        curl -fsSL https://github.com/instruqt/cli/releases/latest/download/instruqt-linux.zip \
+          -o instruqt.zip
+        mkdir -p instruqt-cli-tmp
+        unzip -q -o instruqt.zip -d instruqt-cli-tmp
+        sudo install -m 0755 instruqt-cli-tmp/instruqt /usr/local/bin/instruqt
+        rm -rf instruqt-cli-tmp instruqt.zip
+        instruqt version
+
+    - name: Push track
+      env:
+        INSTRUQT_TOKEN: ${{ secrets.INSTRUQT_TOKEN }}
+      run: |
+        mkdir -p /home/runner/.config/instruqt
+        echo "token: $INSTRUQT_TOKEN" > /home/runner/.config/instruqt/credentials
+        cd instruqt && instruqt track push --force
+
+    - name: Commit writeback (checksum + tab ids)
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add instruqt/
+        git diff --staged --quiet || \
+          git commit -m "chore: instruqt writeback after push [skip ci]"
+        git push

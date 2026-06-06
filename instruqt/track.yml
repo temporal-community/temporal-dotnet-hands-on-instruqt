@@ -1,0 +1,44 @@
+slug: temporal-dotnet-hands-on
+id: ""
+title: Temporal .NET Hands-On
+teaser: Five progressive C# exercises — from converting a fragile pipeline to implementing the Saga pattern.
+description: |-
+  A hands-on workshop teaching Temporal fundamentals through a vehicle
+  transaction processing domain in C# / .NET 10.
+
+  Starting from a realistic but fragile pipeline, you convert it to a
+  durable Temporal workflow, then progressively add child workflows,
+  parallel activities, signals and queries, and finally the Saga pattern
+  for distributed compensation.
+
+  Each exercise builds on the last. Practice and solution projects are
+  both available in the sandbox — work through the TODOs at your own pace.
+icon: ""
+tags:
+- temporal
+- dotnet
+- csharp
+- hands-on
+owner: temporal
+developers:
+- marcus.merrell@temporal.io
+idle_timeout: 900
+timelimit: 14400
+lab_config:
+  extend_ttl: 900
+  sidebar_enabled: true
+  feedback_recap_enabled: true
+  feedback_tab_enabled: false
+  loadingMessages:
+  - Restoring NuGet packages at the speed of light...
+  - Provisioning your durable sandbox...
+  - Spinning up the Temporal dev server...
+  - Your C# workflows are nearly ready...
+  - Almost there — warming up the .NET runtime...
+  theme:
+    name: modern-dark
+  override_challenge_layout: true
+  hideStopButton: false
+  default_layout: AssignmentLeft
+  default_layout_sidebar_size: 35
+enhanced_loading: false
