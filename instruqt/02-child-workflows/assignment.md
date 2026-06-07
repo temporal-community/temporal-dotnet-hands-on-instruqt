@@ -1,9 +1,10 @@
 ---
 slug: child-workflows
-id: ""
+id: pjbtapbqqrrr
 type: challenge
-title: "Exercise 2: Child Workflows"
-teaser: Extract document generation into a child workflow with its own lifecycle and retry boundary.
+title: 'Exercise 2: Child Workflows'
+teaser: Extract document generation into a child workflow with its own lifecycle and
+  retry boundary.
 notes:
 - type: text
   contents: |-
@@ -18,19 +19,23 @@ notes:
     boundary, and its own identity in the Temporal UI. The parent just waits
     for the result.
 tabs:
-- title: Terminal 1 - Worker
+- id: xfamifw7zumc
+  title: Terminal 1 - Worker
   type: terminal
   hostname: workshop
   workdir: /root/workshop/exercise
-- title: Terminal 2 - Starter
+- id: zrks7jq8tnfc
+  title: Terminal 2 - Starter
   type: terminal
   hostname: workshop
   workdir: /root/workshop/exercise
-- title: VS Code
+- id: oxn2xz5wydm7
+  title: VS Code
   type: service
   hostname: workshop
   port: 8080
-- title: Temporal UI
+- id: vefdu8xdzsrg
+  title: Temporal UI
   type: service
   hostname: workshop
   port: 8233

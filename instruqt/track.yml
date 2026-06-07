@@ -1,7 +1,8 @@
 slug: temporal-dotnet-hands-on
-id: ""
+id: rjuk6fun1xk2
 title: Temporal .NET Hands-On
-teaser: Five progressive C# exercises — from converting a fragile pipeline to implementing the Saga pattern.
+teaser: Five progressive C# exercises — from converting a fragile pipeline to implementing
+  the Saga pattern.
 description: |-
   A hands-on workshop teaching Temporal fundamentals through a vehicle
   transaction processing domain in C# / .NET 10.
@@ -15,10 +16,10 @@ description: |-
   both available in the sandbox — work through the TODOs at your own pace.
 icon: ""
 tags:
-- temporal
 - dotnet
-- csharp
 - hands-on
+- csharp
+- temporal
 owner: temporal
 developers:
 - marcus.merrell@temporal.io
@@ -41,4 +42,5 @@ lab_config:
   hideStopButton: false
   default_layout: AssignmentLeft
   default_layout_sidebar_size: 35
+checksum: "6303559968554883076"
 enhanced_loading: false

@@ -1,8 +1,8 @@
 ---
 slug: converting
-id: ""
+id: gl85syn78jtj
 type: challenge
-title: "Exercise 1: Converting a Workflow"
+title: 'Exercise 1: Converting a Workflow'
 teaser: Replace a fragile retry-riddled pipeline with a durable Temporal workflow.
 notes:
 - type: text
@@ -30,19 +30,23 @@ notes:
 
     Your workflow will describe only the happy path.
 tabs:
-- title: Terminal 1 - Worker
+- id: yfoazsbhtogk
+  title: Terminal 1 - Worker
   type: terminal
   hostname: workshop
   workdir: /root/workshop/exercise
-- title: Terminal 2 - Starter
+- id: lzmuke0f5ezm
+  title: Terminal 2 - Starter
   type: terminal
   hostname: workshop
   workdir: /root/workshop/exercise
-- title: VS Code
+- id: 2trbdn8da5cp
+  title: VS Code
   type: service
   hostname: workshop
   port: 8080
-- title: Temporal UI
+- id: ekcqczjwsqo8
+  title: Temporal UI
   type: service
   hostname: workshop
   port: 8233
