@@ -1,5 +1,5 @@
 # ABOUTME: Sandbox image for the Temporal .NET Hands-On workshop.
-# Bakes in: .NET 9 SDK, Temporal CLI, code-server + C# Dev Kit,
+# Bakes in: .NET 9 SDK, Temporal CLI, code-server + C# (OmniSharp) extension,
 # all five exercise source trees (practice + solution), NuGet packages
 # pre-restored for all ten projects.
 #
@@ -75,9 +75,13 @@ RUN for dir in \
         echo "Restoring $dir..." && dotnet restore "$dir" -q || true; \
     done
 
-# ── 6. code-server + C# Dev Kit ──────────────────────────────────────────────
+# ── 6. code-server + C# extension (Open VSX) ─────────────────────────────────
+# ms-dotnettools.csdevkit is Microsoft Marketplace only and unavailable in
+# code-server. ms-dotnettools.csharp (OmniSharp) is on Open VSX and provides
+# syntax highlighting, IntelliSense, and go-to-definition — sufficient for
+# fill-in-the-blanks workshop exercises.
 RUN curl -fsSL https://code-server.dev/install.sh | sh \
-    && code-server --install-extension ms-dotnettools.csdevkit \
+    && code-server --install-extension ms-dotnettools.csharp \
     && mkdir -p /root/.local/share/code-server/User \
     && printf '{\n\
     "workbench.colorTheme": "Default Dark+",\n\
