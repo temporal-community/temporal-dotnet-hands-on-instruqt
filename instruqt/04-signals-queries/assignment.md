@@ -1,6 +1,6 @@
 ---
 slug: signals-queries
-id: ""
+id: tvhojmvz9wbt
 type: challenge
 title: 'Exercise 4: Signals and Queries'
 teaser: Pause a high-value transaction for manager approval, then resume it with a
@@ -27,19 +27,23 @@ notes:
     anything and can be called at any time from outside the workflow —
     from a dashboard, a CLI, or another service.
 tabs:
-- title: Terminal 1 - Worker
+- id: wyh9x50egzjx
+  title: Terminal 1 - Worker
   type: terminal
   hostname: workshop
   workdir: /root/workshop/exercise
-- title: Terminal 2 - Starter
+- id: ignd5rvtyrob
+  title: Terminal 2 - Starter
   type: terminal
   hostname: workshop
   workdir: /root/workshop/exercise
-- title: VS Code
+- id: 496hudh1ibvu
+  title: VS Code
   type: service
   hostname: workshop
   port: 8080
-- title: Temporal UI
+- id: 8233ajgprqrv
+  title: Temporal UI
   type: service
   hostname: workshop
   port: 8233
