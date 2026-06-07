@@ -1,5 +1,5 @@
 # ABOUTME: Sandbox image for the Temporal .NET Hands-On workshop.
-# Bakes in: .NET 10 SDK, Temporal CLI, code-server + C# Dev Kit,
+# Bakes in: .NET 9 SDK, Temporal CLI, code-server + C# Dev Kit,
 # all five exercise source trees (practice + solution), NuGet packages
 # pre-restored for all ten projects.
 #
@@ -35,12 +35,12 @@ RUN echo "deb http://us-central1.gce.archive.ubuntu.com/ubuntu jammy main restri
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# ── 2. .NET 10 SDK ────────────────────────────────────────────────────────────
+# ── 2. .NET 9 SDK (via Microsoft apt feed) ───────────────────────────────────
 RUN wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb \
     && dpkg -i packages-microsoft-prod.deb \
     && rm packages-microsoft-prod.deb \
     && apt-get update \
-    && apt-get install -y dotnet-sdk-10.0 \
+    && apt-get install -y dotnet-sdk-9.0 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
