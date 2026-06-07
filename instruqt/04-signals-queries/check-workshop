@@ -3,19 +3,40 @@ set -euo pipefail
 fail() { echo "FAIL: $1"; exit 1; }
 pass() { echo "PASS: $1"; }
 
-for f in /root/workshop/exercise/*.cs; do
-    if grep -q "NotImplementedException" "$f"; then
-        fail "$(basename $f) still has unimplemented stubs."
-    fi
-done
+WORKFLOW="/root/workshop/exercise/VehicleTransactionWorkflow.cs"
+
+# Check stubs implemented
+if grep -v '^\s*//' "$WORKFLOW" | grep -q "NotImplementedException"; then
+    fail "VehicleTransactionWorkflow.cs still has unimplemented stubs."
+fi
 pass "Stubs implemented"
 
+# Check signal handler exists
+if ! grep -q "WorkflowSignal" "$WORKFLOW"; then
+    fail "No [WorkflowSignal] handler found. Implement ApproveTransactionAsync."
+fi
+pass "Signal handler present"
+
+# Check query handler exists
+if ! grep -q "WorkflowQuery" "$WORKFLOW"; then
+    fail "No [WorkflowQuery] handler found. Implement GetStatus."
+fi
+pass "Query handler present"
+
+# Check WaitConditionAsync is used
+if ! grep -q "WaitConditionAsync" "$WORKFLOW"; then
+    fail "WaitConditionAsync not found. Use it to pause until approval arrives."
+fi
+pass "WaitConditionAsync used"
+
+# Check project compiles
 cd /root/workshop/exercise
 if ! dotnet build -q 2>&1; then
     fail "Project does not compile."
 fi
 pass "Project compiles"
 
+# Check at least one completed workflow
 COMPLETED=$(temporal workflow list \
     --address 127.0.0.1:7233 \
     --namespace default \
@@ -23,8 +44,9 @@ COMPLETED=$(temporal workflow list \
     --limit 1 2>/dev/null | grep -c "Completed" || true)
 
 if [[ "${COMPLETED}" -lt 1 ]]; then
-    fail "No completed workflows found. Run the starter and wait for it to finish."
+    fail "No completed workflows found. Start a workflow, send the approve signal, and wait for it to finish."
 fi
 pass "At least one workflow completed"
+
 echo "Exercise 4 complete."
 exit 0
