@@ -37,6 +37,10 @@ tabs:
   type: terminal
   hostname: workshop
   workdir: /root/workshop/exercise
+- title: Terminal 3 - Signal/Query
+  type: terminal
+  hostname: workshop
+  workdir: /root/workshop/exercise
 - id: 04v6ulskisxy
   title: VS Code
   type: service
@@ -55,11 +59,11 @@ enhanced_loading: null
 # Exercise 4: Signals and Queries
 
 > [!NOTE]
-> **Tabs:** [button label="Terminal 1 - Worker" background="#444CE7"](tab-0) · [button label="Terminal 2 - Starter" background="#444CE7"](tab-1) · [button label="VS Code" background="#444CE7"](tab-2) · [button label="Temporal UI" background="#444CE7"](tab-3)
+> **Tabs:** [button label="Terminal 1 - Worker" background="#444CE7"](tab-0) · [button label="Terminal 2 - Starter" background="#444CE7"](tab-1) · [button label="Terminal 3 - Signal/Query" background="#444CE7"](tab-2) · [button label="VS Code" background="#444CE7"](tab-3) · [button label="Temporal UI" background="#444CE7"](tab-4)
 
 ## Your task
 
-Open [button label="VS Code" background="#444CE7"](tab-2) and open `VehicleTransactionWorkflow.cs`.
+Open [button label="VS Code" background="#444CE7"](tab-3) and open `VehicleTransactionWorkflow.cs`.
 There are three TODOs:
 
 **1. Signal handler** — add an `ApproveTransactionAsync` method decorated with
@@ -90,21 +94,23 @@ Start a high-value workflow in [button label="Terminal 2 - Starter" background="
 dotnet run -- starter
 ```
 
-Query the workflow status — note the workflow ID printed by the starter:
+In [button label="Terminal 3 - Signal/Query" background="#444CE7"](tab-2), query the workflow
+status while it is paused:
 
 ```bash,run
 dotnet run -- query vehicle-tx-VIN-2026-COXAUTO-004
 ```
 
-Send the approval signal to resume the workflow:
+Then send the approval signal to resume it:
 
 ```bash,run
 dotnet run -- approve vehicle-tx-VIN-2026-COXAUTO-004
 ```
 
-Watch the starter terminal — the workflow resumes and completes immediately.
+Watch [button label="Terminal 2 - Starter" background="#444CE7"](tab-1) — the workflow resumes
+and completes immediately after the signal arrives.
 
-Open [button label="Temporal UI" background="#444CE7"](tab-3) and find the `WorkflowSignalReceived`
+Open [button label="Temporal UI" background="#444CE7"](tab-4) and find the `WorkflowSignalReceived`
 event in the history. Notice the workflow was paused between that event and the
 `ActivityTaskScheduled` for payment.
 
