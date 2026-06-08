@@ -37,7 +37,7 @@ tabs:
   type: terminal
   hostname: workshop
   workdir: /root/workshop/exercise
-- id: 0npn7slvjnqv
+- id: ysbkfyaxlacm
   title: Terminal 3 - Signal/Query
   type: terminal
   hostname: workshop
