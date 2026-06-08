@@ -7,9 +7,9 @@
 set -euo pipefail
 
 # 1. Stage workshop source into writable home directory.
-if [ ! -d /root/workshop ]; then
-    cp -r /opt/workshop /root/workshop
-fi
+# Always re-copy so that image updates are reflected on track restart.
+rm -rf /root/workshop
+cp -r /opt/workshop /root/workshop
 
 # 2. Start Temporal dev server.
 nohup temporal server start-dev \
