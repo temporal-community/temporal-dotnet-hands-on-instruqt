@@ -1,6 +1,6 @@
 ---
 slug: parallel-activities
-id: oyt5dofafhs3
+id: ghi66we6alnh
 type: challenge
 title: 'Exercise 3: Parallel Activities'
 teaser: Fan out independent checks concurrently and gate on both completing before
@@ -29,22 +29,22 @@ notes:
     Open the Temporal UI after a run and look at the event history — both
     ActivityTaskScheduled events will appear at nearly the same sequence number.
 tabs:
-- id: w3pwsaquih4k
+- id: 3vsrdy5pn0ug
   title: Terminal 1 - Worker
   type: terminal
   hostname: workshop
   workdir: /root/workshop/exercise
-- id: axofbdrcg3f4
+- id: cmomvtqci1yx
   title: Terminal 2 - Starter
   type: terminal
   hostname: workshop
   workdir: /root/workshop/exercise
-- id: stiyxh7f15rt
+- id: ppnzikaemjkm
   title: VS Code
   type: service
   hostname: workshop
   port: 8080
-- id: oycyy523drsp
+- id: ptdkug1c0hhh
   title: Temporal UI
   type: service
   hostname: workshop

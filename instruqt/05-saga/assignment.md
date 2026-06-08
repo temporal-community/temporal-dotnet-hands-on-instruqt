@@ -1,6 +1,6 @@
 ---
 slug: saga
-id: iehdinhspu0y
+id: cqzh9xgmqpnl
 type: challenge
 title: 'Exercise 5: Saga / Compensation'
 teaser: Undo completed steps in reverse when a later step fails permanently.
@@ -33,22 +33,22 @@ notes:
     the refund runs, and the workflow fails cleanly with no money charged
     and no orphaned records.
 tabs:
-- id: l35iktuc6lld
+- id: xzktrntgnd1q
   title: Terminal 1 - Worker
   type: terminal
   hostname: workshop
   workdir: /root/workshop/exercise
-- id: kisbkqp9kgrh
+- id: ifvicxgku84k
   title: Terminal 2 - Starter
   type: terminal
   hostname: workshop
   workdir: /root/workshop/exercise
-- id: ypd80oufabln
+- id: oj5eeufxnudk
   title: VS Code
   type: service
   hostname: workshop
   port: 8080
-- id: 9mhyfxwyydxi
+- id: mvglt9ztazks
   title: Temporal UI
   type: service
   hostname: workshop
