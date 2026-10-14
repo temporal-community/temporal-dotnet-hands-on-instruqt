@@ -44,7 +44,8 @@ tabs:
   type: terminal
   hostname: workshop
   workdir: /root/workshop/exercise
-- title: Terminal 3 - Underwriter
+- id: ysbkfyaxlacm
+  title: Terminal 3 - Underwriter
   type: terminal
   hostname: workshop
   workdir: /root/workshop/exercise
