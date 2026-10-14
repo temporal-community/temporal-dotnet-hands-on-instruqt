@@ -1,19 +1,24 @@
 slug: temporal-dotnet-hands-on
 id: rjuk6fun1xk2
 title: Temporal .NET Hands-On
-teaser: Five progressive C# exercises — from converting a fragile pipeline to implementing
-  the Saga pattern.
+teaser: Three hands-on C# challenges — durable orchestration, human-in-the-loop
+  approval, and the saga pattern.
 description: |-
-  A hands-on workshop teaching Temporal fundamentals through a vehicle
-  transaction processing domain in C# / .NET 10.
+  A hands-on workshop teaching Temporal fundamentals in C# / .NET
+  through an auto-loan underwriting domain.
 
-  Starting from a realistic but fragile pipeline, you convert it to a
-  durable Temporal workflow, then progressively add child workflows,
-  parallel activities, signals and queries, and finally the Saga pattern
-  for distributed compensation.
+  Three challenges, roughly half a day:
 
-  Each exercise builds on the last. Practice and solution projects are
-  both available in the sandbox — work through the TODOs at your own pace.
+  1. Orchestrate three unreliable service calls as a durable workflow,
+     configure a retry policy, and prove durability by killing the
+     worker mid-run.
+  2. Pause an application for an underwriter using a workflow update,
+     expose its state with a query, and escalate a stalled decision.
+  3. Unwind committed work with the saga pattern, and learn why
+     compensations must be registered first and written idempotently.
+
+  Each challenge builds on the last. Practice and solution projects are
+  both in the sandbox — work through the TODOs at your own pace.
 icon: ""
 tags:
 - dotnet

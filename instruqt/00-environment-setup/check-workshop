@@ -1,15 +1,23 @@
 #!/bin/bash
-set -euo pipefail
+set -uo pipefail
+fail() { echo "FAIL: $1"; exit 1; }
+pass() { echo "PASS: $1"; }
 
-if ! temporal operator cluster health --address 127.0.0.1:7233 2>/dev/null | grep -q "SERVING"; then
-    echo "FAIL: Temporal dev server is not healthy. Wait a moment and try again."
-    exit 1
-fi
+ADDR="${TEMPORAL_ADDRESS:-127.0.0.1:7233}"
 
-if ! dotnet --version >/dev/null 2>&1; then
-    echo "FAIL: dotnet CLI not found."
-    exit 1
-fi
+temporal operator cluster health --address "$ADDR" 2>/dev/null | grep -q "SERVING" \
+    || fail "Temporal dev server is not healthy yet. Wait a few seconds and try again."
+pass "Temporal dev server is SERVING"
 
-echo "OK: Temporal healthy, .NET SDK available."
+dotnet --version >/dev/null 2>&1 || fail "dotnet CLI not found."
+pass ".NET SDK available ($(dotnet --version))"
+
+command -v jq >/dev/null 2>&1 || fail "jq not found — the challenge checks need it."
+pass "jq available"
+
+[[ -d /root/workshop/exercises/01_orchestrate/practice ]] \
+    || fail "Workshop source is missing from /root/workshop/exercises."
+pass "Workshop source staged"
+
+echo "Environment ready."
 exit 0

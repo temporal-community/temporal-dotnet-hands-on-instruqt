@@ -1,0 +1,107 @@
+#!/bin/bash
+# ABOUTME: Verifies Challenge 1 — activities and workflow implemented, retry
+# policy configured, determinism respected, and a real run that retried and
+# survived a worker restart.
+set -uo pipefail
+
+fail() { echo "FAIL: $1"; exit 1; }
+pass() { echo "PASS: $1"; }
+
+# Overridable so the same script can be exercised outside the sandbox.
+EX="${WORKSHOP_EXERCISE:-/root/workshop/exercise}"
+ADDR="${TEMPORAL_ADDRESS:-127.0.0.1:7233}"
+NS=default
+TQ=loan-underwriting
+
+ACTIVITIES="$EX/LoanUnderwritingActivities.cs"
+WORKFLOW="$EX/LoanUnderwritingWorkflow.cs"
+
+[[ -f "$ACTIVITIES" ]] || fail "Cannot find $ACTIVITIES"
+[[ -f "$WORKFLOW"   ]] || fail "Cannot find $WORKFLOW"
+
+# Strip // comments so the guidance in the TODOs never counts as an answer.
+code() { sed 's|//.*||' "$1"; }
+
+# ── 1. Stubs implemented ─────────────────────────────────────────────────────
+code "$ACTIVITIES" | grep -q "NotImplementedException" \
+    && fail "LoanUnderwritingActivities.cs still throws NotImplementedException. Implement TODO 1-3."
+code "$WORKFLOW" | grep -q "NotImplementedException" \
+    && fail "LoanUnderwritingWorkflow.cs still throws NotImplementedException. Implement TODO 1-2."
+pass "Activities and workflow implemented"
+
+# ── 2. Retry policy configured ───────────────────────────────────────────────
+code "$WORKFLOW" | grep -q "RetryPolicy" \
+    || fail "No RetryPolicy found in the workflow. Define one inside your ActivityOptions."
+code "$WORKFLOW" | grep -q "ActivityOptions" \
+    || fail "No ActivityOptions found in the workflow."
+pass "Retry policy configured in ActivityOptions"
+
+# ── 3. Activity context used for logging and idempotency ─────────────────────
+code "$ACTIVITIES" | grep -q "ActivityExecutionContext" \
+    || fail "PullCreditAsync should use ActivityExecutionContext.Current for the attempt number and idempotency key."
+code "$ACTIVITIES" | grep -q "ActivityId" \
+    || fail "Build the idempotency key from info.WorkflowId and info.ActivityId."
+code "$ACTIVITIES" | grep -qE "Attempt" \
+    || fail "Log info.Attempt so you can watch the retries happen."
+pass "Activity context used for attempt logging and idempotency key"
+
+# ── 4. Deterministic workflow APIs ───────────────────────────────────────────
+code "$WORKFLOW" | grep -q "Workflow.UtcNow" \
+    || fail "Use Workflow.UtcNow in the workflow (not DateTime.Now) — it is replay-safe."
+code "$WORKFLOW" | grep -q "Workflow.Logger" \
+    || fail "Use Workflow.Logger to log from the workflow."
+
+for banned in "DateTime.Now" "DateTime.UtcNow" "Guid.NewGuid" "Task.Delay" "new Random" "Random.Shared"; do
+    code "$WORKFLOW" | grep -qF "$banned" \
+        && fail "'$banned' appears in workflow code and is not replay-safe. Use the Workflow.* equivalent."
+done
+pass "Workflow code is deterministic (Workflow.UtcNow / Workflow.Logger, no banned APIs)"
+
+# ── 5. Compiles ──────────────────────────────────────────────────────────────
+cd "$EX" || fail "Cannot enter $EX"
+if ! dotnet build -v q --nologo >/tmp/check01-build.log 2>&1; then
+    echo "--- build output ---"; tail -20 /tmp/check01-build.log
+    fail "Project does not compile."
+fi
+pass "Project compiles"
+
+# ── 6. A workflow actually completed ─────────────────────────────────────────
+COMPLETED=$(temporal workflow list --address "$ADDR" --namespace "$NS" \
+    --query "TaskQueue='$TQ' AND ExecutionStatus='Completed'" \
+    --limit 20 --output json 2>/dev/null | jq -r '.[].execution.workflowId' | head -20)
+
+[[ -z "$COMPLETED" ]] \
+    && fail "No completed workflows yet. Start the worker, run 'dotnet run -- starter', and let it finish."
+pass "At least one application completed"
+
+# ── 7. The retry policy actually did something ───────────────────────────────
+RETRIED=0
+RESTARTED=0
+for wfid in $COMPLETED; do
+    HIST=$(temporal workflow show --address "$ADDR" --namespace "$NS" \
+        --workflow-id "$wfid" --output json 2>/dev/null) || continue
+
+    MAXATTEMPT=$(echo "$HIST" | jq -r '[.events[]
+        | select(.eventType == "EVENT_TYPE_ACTIVITY_TASK_STARTED")
+        | .activityTaskStartedEventAttributes.attempt // 1] | max // 0')
+    [[ "${MAXATTEMPT:-0}" -gt 1 ]] && RETRIED=1
+
+    # Each worker process has its own identity (pid@host). Two or more across
+    # the worker-side events means the workflow outlived a worker restart.
+    IDENTITIES=$(echo "$HIST" | jq -r '[.events[]
+        | (.workflowTaskCompletedEventAttributes.identity
+           // .activityTaskStartedEventAttributes.identity
+           // empty)] | unique | length')
+    [[ "${IDENTITIES:-0}" -ge 2 ]] && RESTARTED=1
+done
+
+[[ "$RETRIED" -eq 1 ]] \
+    || fail "No activity retries found. PullCreditAsync should fail its first two attempts — check that you throw when info.Attempt < 3, and that CreditOptions has a RetryPolicy."
+pass "Credit pull retried and recovered (attempt > 1 in history)"
+
+[[ "$RESTARTED" -eq 1 ]] \
+    || fail "No worker restart detected. Part D: run the starter again, press Ctrl+C in the worker terminal when you see the 'attempt 2' failure, wait a few seconds, then start the worker again and let the application finish."
+pass "An application survived a worker restart"
+
+echo "Challenge 1 complete."
+exit 0

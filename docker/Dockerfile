@@ -1,7 +1,7 @@
 # ABOUTME: Sandbox image for the Temporal .NET Hands-On workshop.
-# Bakes in: .NET 9 SDK, Temporal CLI, code-server,
-# all five exercise source trees (practice + solution), NuGet packages
-# pre-restored for all ten projects.
+# Bakes in: .NET 9 SDK, Temporal CLI, jq, code-server,
+# all three challenge source trees (practice + solution), NuGet packages
+# pre-restored for all six projects.
 #
 # Build context: repo root. The GHA workflow checks out
 # temporal-community/temporal-dotnet-hands-on alongside this Dockerfile
@@ -32,6 +32,7 @@ RUN echo "deb http://us-central1.gce.archive.ubuntu.com/ubuntu jammy main restri
         gnupg \
         bash-completion \
         apt-transport-https \
+        jq \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -58,21 +59,29 @@ ENV PATH="${PATH}:/root/.temporalio/bin"
 # into ./temporal-dotnet-hands-on/ in the build context.
 COPY temporal-dotnet-hands-on/ /opt/workshop/
 
-# ── 5. Pre-restore NuGet packages for all ten projects ───────────────────────
+# ── 5. Pre-restore NuGet packages for all six projects ──────────────────────
 # Restoring at build time means participants never wait for package downloads.
-# Each exercise has an independent practice/ and solution/ project.
+# Each challenge has an independent practice/ and solution/ project.
 RUN for dir in \
-        /opt/workshop/exercises/01_converting/practice \
-        /opt/workshop/exercises/01_converting/solution \
-        /opt/workshop/exercises/02_child_workflows/practice \
-        /opt/workshop/exercises/02_child_workflows/solution \
-        /opt/workshop/exercises/03_parallel_activities/practice \
-        /opt/workshop/exercises/03_parallel_activities/solution \
-        /opt/workshop/exercises/04_signals_queries/practice \
-        /opt/workshop/exercises/04_signals_queries/solution \
-        /opt/workshop/exercises/05_saga/practice \
-        /opt/workshop/exercises/05_saga/solution; do \
+        /opt/workshop/exercises/01_orchestrate/practice \
+        /opt/workshop/exercises/01_orchestrate/solution \
+        /opt/workshop/exercises/02_underwriter_decision/practice \
+        /opt/workshop/exercises/02_underwriter_decision/solution \
+        /opt/workshop/exercises/03_saga/practice \
+        /opt/workshop/exercises/03_saga/solution; do \
         echo "Restoring $dir..." && dotnet restore "$dir" -q || true; \
+    done
+
+# Build each project once so the first in-sandbox build is fast and the image
+# fails loudly here if anything is broken, rather than in front of attendees.
+RUN for dir in \
+        /opt/workshop/exercises/01_orchestrate/practice \
+        /opt/workshop/exercises/01_orchestrate/solution \
+        /opt/workshop/exercises/02_underwriter_decision/practice \
+        /opt/workshop/exercises/02_underwriter_decision/solution \
+        /opt/workshop/exercises/03_saga/practice \
+        /opt/workshop/exercises/03_saga/solution; do \
+        echo "Building $dir..." && dotnet build "$dir" -v q --nologo; \
     done
 
 # ── 6. code-server ───────────────────────────────────────────────────────────

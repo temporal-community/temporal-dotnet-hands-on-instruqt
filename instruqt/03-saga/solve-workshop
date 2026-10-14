@@ -1,0 +1,6 @@
+#!/bin/bash
+set -euo pipefail
+rm -rf /root/workshop/exercise
+cp -r /root/workshop/exercises/03_saga/solution /root/workshop/exercise
+cp /root/workshop/exercises/03_saga/README.md /root/workshop/exercise/README.md
+echo "Challenge 3 solved — reference solution applied to /root/workshop/exercise."

@@ -1,0 +1,81 @@
+#!/bin/bash
+# ABOUTME: Verifies Challenge 2 — update handler, validator, query handler and
+# the escalating wait, plus a real application decided through an update.
+set -uo pipefail
+
+fail() { echo "FAIL: $1"; exit 1; }
+pass() { echo "PASS: $1"; }
+
+# Overridable so the same script can be exercised outside the sandbox.
+EX="${WORKSHOP_EXERCISE:-/root/workshop/exercise}"
+ADDR="${TEMPORAL_ADDRESS:-127.0.0.1:7233}"
+NS=default
+TQ=loan-underwriting
+
+WORKFLOW="$EX/LoanUnderwritingWorkflow.cs"
+[[ -f "$WORKFLOW" ]] || fail "Cannot find $WORKFLOW"
+
+code() { sed 's|//.*||' "$1"; }
+
+# ── 1. Stubs implemented ─────────────────────────────────────────────────────
+code "$WORKFLOW" | grep -q "NotImplementedException" \
+    && fail "LoanUnderwritingWorkflow.cs still throws NotImplementedException. Implement TODO 1-4."
+pass "Stubs implemented"
+
+# ── 2. Handlers present ──────────────────────────────────────────────────────
+code "$WORKFLOW" | grep -q "WorkflowUpdateValidator" \
+    || fail "No [WorkflowUpdateValidator] found. TODO 2: add a validator for SubmitDecisionAsync."
+code "$WORKFLOW" | grep -q "WorkflowUpdate\]" \
+    || fail "No [WorkflowUpdate] found. TODO 1: decorate SubmitDecisionAsync."
+code "$WORKFLOW" | grep -q "WorkflowQuery" \
+    || fail "No [WorkflowQuery] found. TODO 3: decorate GetStatus."
+pass "Update handler, validator and query handler present"
+
+# ── 3. The escalating wait ───────────────────────────────────────────────────
+WAITS=$(code "$WORKFLOW" | grep -c "WaitConditionAsync")
+[[ "${WAITS:-0}" -ge 2 ]] \
+    || fail "Expected two WaitConditionAsync calls (found ${WAITS:-0}): one with the escalation timeout, then one without so the workflow keeps waiting after it escalates."
+code "$WORKFLOW" | grep -q "EscalationThreshold" \
+    || fail "The first wait should use EscalationThreshold as its timeout."
+pass "Escalating wait implemented (timed wait, then an indefinite one)"
+
+# ── 4. Deterministic workflow APIs ───────────────────────────────────────────
+for banned in "DateTime.Now" "DateTime.UtcNow" "Guid.NewGuid" "Task.Delay" "new Random" "Random.Shared"; do
+    code "$WORKFLOW" | grep -qF "$banned" \
+        && fail "'$banned' appears in workflow code and is not replay-safe. Use the Workflow.* equivalent."
+done
+pass "Workflow code is deterministic"
+
+# ── 5. Compiles ──────────────────────────────────────────────────────────────
+cd "$EX" || fail "Cannot enter $EX"
+if ! dotnet build -v q --nologo >/tmp/check02-build.log 2>&1; then
+    echo "--- build output ---"; tail -20 /tmp/check02-build.log
+    fail "Project does not compile."
+fi
+pass "Project compiles"
+
+# ── 6. An application was actually decided via an update ─────────────────────
+WFIDS=$(temporal workflow list --address "$ADDR" --namespace "$NS" \
+    --query "TaskQueue='$TQ'" --limit 20 --output json 2>/dev/null \
+    | jq -r '.[].execution.workflowId' | head -20)
+
+[[ -z "$WFIDS" ]] \
+    && fail "No workflows found. Start the worker and run 'dotnet run -- starter'."
+
+DECIDED=0
+for wfid in $WFIDS; do
+    HIST=$(temporal workflow show --address "$ADDR" --namespace "$NS" \
+        --workflow-id "$wfid" --output json 2>/dev/null) || continue
+    if echo "$HIST" | jq -e '[.events[].eventType]
+            | index("EVENT_TYPE_WORKFLOW_EXECUTION_UPDATE_COMPLETED")' >/dev/null 2>&1; then
+        DECIDED=1
+        break
+    fi
+done
+
+[[ "$DECIDED" -eq 1 ]] \
+    || fail "No completed update found in any workflow history. Start an application, then run 'dotnet run -- decide <workflow-id> approve' from Terminal 3."
+pass "An application was decided through a workflow update"
+
+echo "Challenge 2 complete."
+exit 0
