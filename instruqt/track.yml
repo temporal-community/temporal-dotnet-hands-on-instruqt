@@ -1,8 +1,8 @@
 slug: temporal-dotnet-hands-on
 id: rjuk6fun1xk2
 title: Temporal .NET Hands-On
-teaser: Three hands-on C# challenges — durable orchestration, human-in-the-loop
-  approval, and the saga pattern.
+teaser: Three hands-on C# challenges — durable orchestration, human-in-the-loop approval,
+  and the saga pattern.
 description: |-
   A hands-on workshop teaching Temporal fundamentals in C# / .NET
   through an auto-loan underwriting domain.
@@ -47,5 +47,5 @@ lab_config:
   hideStopButton: false
   default_layout: AssignmentLeft
   default_layout_sidebar_size: 35
-checksum: "2989070971710959600"
+checksum: "9191268142521790011"
 enhanced_loading: false
